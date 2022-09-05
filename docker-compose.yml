@@ -1,0 +1,46 @@
+version: "3.9"
+   
+services:
+  db:
+    image: "postgis/postgis"
+    restart: always 
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    networks:
+      - webnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d template_postgis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./gledsys
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    volumes:
+      - ./gledsys:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db:db
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge
