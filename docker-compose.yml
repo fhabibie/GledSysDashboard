@@ -15,9 +15,10 @@ services:
     networks:
       - webnet
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d template_postgis"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 80s
+      timeout: 50s
+      start_period: 80s
       retries: 5
 
   web:
