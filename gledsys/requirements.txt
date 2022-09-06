@@ -1,2 +1,4 @@
-Django>=4.0,<=4.1
+Django>=3.5,<=4.1
 psycopg2>=2.8
+pygmt==0.7.0
+matplotlib==3.5.3
