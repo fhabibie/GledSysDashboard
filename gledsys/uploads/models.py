@@ -10,8 +10,12 @@ class LightningFiles(models.Model):
     def __str__(self):
         return f"File: {self.filename}"
 
+    def path(self):
+        return self.files.path
+
 class Lightning(models.Model):
-    datetime_utc = models.TimeField()
+    files = models.ForeignKey(LightningFiles, on_delete=models.CASCADE)
+    datetime_utc = models.DateTimeField()
     latitude = models.FloatField()
     longitude = models.FloatField()
     type = models.IntegerField()

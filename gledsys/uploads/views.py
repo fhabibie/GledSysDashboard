@@ -1,6 +1,8 @@
+from fileinput import filename
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import LightningFiles
+from modules.imports import handle_lighting_data
 
 def index(request):
     context = {
@@ -13,7 +15,9 @@ def upload_lightning(request):
         csvs = request.FILES.getlist('files[]')
 
         for f in csvs:
-            LightningFiles.objects.create(filename=f, files= f)
+            # save_lightning_data(f)
+            obj  = LightningFiles.objects.create(filename=f, files= f)
+            handle_lighting_data(obj)
         return redirect('upload_lightning')
 
     lighting_files = LightningFiles.objects.all()
