@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% block title %}My amazing site{% endblock %}</title>
+    <title>{{ page_title|default:"Dashboard" }} - Gledsys</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -68,7 +68,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Upload Data</h6>
-                        <a class="collapse-item" href="/">Lightning</a>
+                        <a class="collapse-item" href="/upload-lightning">Lightning</a>
                         <a class="collapse-item" href="/">Earthquake</a>
                         <a class="collapse-item" href="/">Weather</a>
                     </div>
@@ -271,6 +271,10 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+
+    <!-- App.js -->
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block javascript %} {% endblock %}
 
 
 </body>
