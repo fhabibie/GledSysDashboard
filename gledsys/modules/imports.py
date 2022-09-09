@@ -1,5 +1,8 @@
 import csv
 from uploads.models import Lightning
+from django.utils.timezone import make_aware
+from django.utils.dateparse import parse_datetime
+
 def handle_lighting_data(obj):
     # Load CSV from storage
     tmp_data = []
@@ -7,9 +10,9 @@ def handle_lighting_data(obj):
         data = csv.reader(f)
         next(data)
         for i, row in enumerate(data):
-            print('saving', i)
+            parsed_datetime = make_aware(parse_datetime(row[2]))
             lighting = Lightning(
-                datetime_utc = row[2],
+                datetime_utc = parsed_datetime,
                 latitude = row[3],
                 longitude = row[4],
                 type = row[5],

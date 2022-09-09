@@ -58,7 +58,7 @@
                         {% for file in files %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ file.filename}}</td>
+                            <td>{{ file.files.name }}</td>
                             <td>{{ file.uploaded_at }}</td>
                             <td>
                                 <a href="{{ file.files.url }}" target="_blank"

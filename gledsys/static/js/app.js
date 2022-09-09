@@ -26,6 +26,9 @@
         $.each(csvs, function(i, file) {
             fd.append('files[]', file)
         });
+        // Reset progress bar
+        $('#uploaded-bar').css("width", `0%`);
+        $('#uploaded-bar').text(`0%`);
         $.ajax({
             type: 'POST',
             url: uploadForm.action,
@@ -42,6 +45,11 @@
                         var percent = (e.loaded / e.total) * 100;
                         $('#uploaded-bar').css("width", `${percent.toFixed(1)}%`);
                         $('#uploaded-bar').text(`${percent.toFixed(1)}%`);
+                        console.log(percent);
+                        if(percent === 100) {
+                            console.log('waiting...')
+                            $('#uploaded-bar').text('Importing csv into database...');
+                        }
                     }
                 });
                 return xhr;

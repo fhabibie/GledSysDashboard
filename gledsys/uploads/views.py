@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from .models import LightningFiles
 from modules.imports import handle_lighting_data
 
+
 def index(request):
     context = {
         'page_title': 'Dashboard',
