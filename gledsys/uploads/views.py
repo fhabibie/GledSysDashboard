@@ -1,7 +1,7 @@
 from fileinput import filename
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
-from .models import LightningFiles
+from .models import Lightning, LightningFiles
 from modules.imports import handle_lighting_data
 
 
@@ -19,13 +19,24 @@ def upload_lightning(request):
             # save_lightning_data(f)
             obj  = LightningFiles.objects.create(filename=f, files= f)
             handle_lighting_data(obj)
-        return redirect('upload_lightning')
+        return redirect('upload-lightning')
 
     lighting_files = LightningFiles.objects.all()
     context = {
-        'page_title': 'Upload Lighctning Dataset',
+        'page_title': 'Upload Lightning Dataset',
         'page_desc': 'Upload lightning dataset with CSV format',
         'files': lighting_files,
     }
 
     return render(request, 'upload_lightning.html', context)
+
+def detail_lightning(request, id_files):
+    files_obj = LightningFiles.objects.get(id = id_files)
+    lightning_obj = Lightning.objects.filter(files_id = id_files)
+
+    context = {
+        'page_title': files_obj,
+        'lightnings' : lightning_obj
+    }
+
+    return render(request, 'detail_lightning.html', context)

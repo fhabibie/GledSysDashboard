@@ -44,7 +44,7 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Files</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
@@ -58,7 +58,7 @@
                         {% for file in files %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ file.files.name }}</td>
+                            <td><a href="/upload-lightning/{{ file.id }}">{{ file.files.name }}</a></td>
                             <td>{{ file.uploaded_at }}</td>
                             <td>
                                 <a href="{{ file.files.url }}" target="_blank"
