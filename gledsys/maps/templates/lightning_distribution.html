@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Content Row -->
+
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-12 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
+            </div>
+            <div class="card-body">
+                <form id="upload-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="col-lg-10 mb-3">
+                            <input id="id_files" class="form-control" accept=".csv" type="file" name="files" multiple>
+                        </div>
+                        <div class="col=lg-2">
+                            <button id="upload-btn" class="btn btn-primary w-100" type="submit" disabled>Upload</button>
+                        </div>
+                </form>
+                <div id="upload-progress-bar" class="progress my-2 d-none">
+                    <div id="uploaded-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="25"
+                        aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <div id="alert-container"></div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-12 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps</h6>
+            </div>
+            <div class="card-body table-responsive">
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+{% endblock %}
