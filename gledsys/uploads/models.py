@@ -1,4 +1,5 @@
-from django.db import models
+# from django.db import models
+from django.contrib.gis.db import models
 
 # Create your models here.
 
@@ -18,4 +19,5 @@ class Lightning(models.Model):
     datetime_utc = models.DateTimeField()
     latitude = models.FloatField()
     longitude = models.FloatField()
+    coord = models.PointField()
     type = models.IntegerField()
