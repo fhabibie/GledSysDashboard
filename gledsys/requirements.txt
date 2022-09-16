@@ -1,4 +1,7 @@
 Django>=3.5,<=4.1
 psycopg2>=2.8
 pygmt==0.7.0
+plotly
+fiona
+geopandas
 matplotlib==3.5.3

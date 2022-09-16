@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN echo "Installing Geospatial libs"
 RUN apt-get update
-RUN apt-get -y install gdal-bin binutils libproj-dev libgdal-dev python3-gdal
+RUN apt-get -y install gdal-bin binutils libproj-dev libgdal-dev python3-gdal g++
 
 RUN echo "Installing postgre client libs"
 RUN apt-get -y install libpq-dev postgresql-client

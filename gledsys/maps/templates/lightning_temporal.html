@@ -101,7 +101,7 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Bar Chart (Matplotlib)</h6>
             </div>
-            <div class="card-body table-responsive">
+            <div class="card-body">
                 <div class="chart-message"></div>
                 <div id="bar-chart">
                     <img id="img-bar-chart" class="img-fluid" src="{{ bar_chart|safe }}" type="" />
@@ -115,7 +115,7 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Pie Chart (Matplotlib)</h6>
             </div>
-            <div class="card-body table-responsive">
+            <div class="card-body">
                 <div class="chart-message"></div>
                 <div id="pie-chart">
                     <img id="img-pie-chart" class="img-fluid" src="{{ pie_chart|safe }}" type="" />
@@ -124,6 +124,37 @@
         </div>
     </div>
 
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Bar Chart (Plotly)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-message"></div>
+                <div id="bar-plotly">
+                     {{ bar_plotly|safe }}
+                </div>
+            </div>
+           
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Pie Chart (Plotly)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-message"></div>
+                <div id="pie-plotly">
+                     {{ pie_plotly|safe }}
+                </div>
+            </div>
+           
+        </div>
+    </div>
 </div>
 
 
@@ -200,9 +231,13 @@
                         $('#img-pie-chart').removeClass('d-none');
                         $('#img-bar-chart').attr('src', res.data.bar);
                         $('#img-pie-chart').attr('src', res.data.pie);
+                        $('#pie-plotly').html(res.data.pieplotly)
+                        $('#bar-plotly').html(res.data.barplotly)
                     } else {
                         $('#img-bar-chart').addClass('d-none');
                         $('#img-pie-chart').addClass('d-none');
+                        $('#pie-plotly').html('');
+                        $('#bar-plotly').html('');
                         $('.chart-message').text('No result found!')
                     }
                 },
