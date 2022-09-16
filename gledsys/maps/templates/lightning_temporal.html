@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Content Row -->
+
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-12 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <!-- Card Header - Accordion -->
+            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseCardExample">
+                <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
+            </a>
+            <div class="collapse show" id="collapseCardExample">
+                <div class="card-body">
+                    <form id="filter-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="daterange">Latitude Range</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Min</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="min-lat"
+                                        placeholder="" value="-6.34232915063942" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Max</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="max-lat"
+                                        placeholder="" value="1.3138862223887" required>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="daterange">Longitude Range</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Min</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="min-lon"
+                                        placeholder="" value="94.0034031691933" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Max</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="max-lon"
+                                        placeholder="" value="95.2507765200479" required>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="daterange">Date and Time Range</label>
+                                <input id="date-range" type="text" name="daterange" class="form-control form-control-sm"
+                                    value="" />
+                            </div>
+
+                            <label>Type</label>
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="0" name="ctype" id="gcp">
+                                    <label class="form-check-label" for="gcp">GC+</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="1" name="ctype" id="gcn">
+                                    <label class="form-check-label" for="gcn">GC-</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="2" name="ctype" id="ic">
+                                    <label class="form-check-label" for="ic">IC</label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <button id="filter-btn" class="col-md-6 btn btn-primary w-100" type="submit">Process</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Bar Chart (Matplotlib)</h6>
+            </div>
+            <div class="card-body table-responsive">
+                <div class="chart-message"></div>
+                <div id="bar-chart">
+                    <img id="img-bar-chart" class="img-fluid" src="{{ bar_chart|safe }}" type="" />
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Pie Chart (Matplotlib)</h6>
+            </div>
+            <div class="card-body table-responsive">
+                <div class="chart-message"></div>
+                <div id="pie-chart">
+                    <img id="img-pie-chart" class="img-fluid" src="{{ pie_chart|safe }}" type="" />
+                 </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $(function () {
+        function getCookie(name) {
+            var cookieValue = null;
+        
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        
+                        break;
+                    }
+                }
+            }
+        
+            return cookieValue;
+        }
+        
+        const filterForm = $('#filter-form');
+        const submitBtn = $('#filter-btn');
+
+        var start = moment().subtract(24, 'month');
+        var end = moment();
+        var data = {}
+        function callbackDateRange(startDate, endDate) {
+            start = startDate
+            end = endDate
+        }
+
+        $('#date-range').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 5,
+            startDate: start,
+            endDate: end,
+            locale: {
+                format: 'MM/DD/YYYY h:mm A'
+            }
+        }, callbackDateRange);
+
+
+        submitBtn.click(function(e){
+            e.preventDefault();
+
+            var ctype = [];
+            $.each($("input[name='ctype']:checked"), function(){
+                ctype.push($(this).val());
+            });
+
+            var data = {
+                latRange: [$('#min-lat').val(), $('#max-lat').val()],
+                lonRange: [$('#min-lon').val(), $('#max-lon').val()],
+                dateRange: [start.format(), end.format()],
+                ctype: ctype,
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'ajax-temporal' %}",
+                headers: {'X-CSRFToken': getCookie('csrftoken')},
+                data: data,
+                success: function (res) {
+                    if (res.data) {
+                        $('.chart-message').text("");
+                        $('#img-bar-chart').removeClass('d-none');
+                        $('#img-pie-chart').removeClass('d-none');
+                        $('#img-bar-chart').attr('src', res.data.bar);
+                        $('#img-pie-chart').attr('src', res.data.pie);
+                    } else {
+                        $('#img-bar-chart').addClass('d-none');
+                        $('#img-pie-chart').addClass('d-none');
+                        $('.chart-message').text('No result found!')
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            })
+        });
+
+    });
+</script>
+
+{% endblock%}

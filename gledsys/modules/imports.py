@@ -7,6 +7,7 @@ from django.contrib.gis.geos import Point
 def handle_lighting_data(obj):
     # Load CSV from storage
     tmp_data = []
+    print('IMPORT > ', obj.files.name)
     with open(obj.files.path, 'r') as f:
         data = csv.reader(f)
         next(data)

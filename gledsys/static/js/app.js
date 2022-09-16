@@ -8,7 +8,6 @@
     const progressBar = $('#upload-progress-bar');
     const uploadBtn = $('#upload-btn')
 
-
     uploadForm.change(function(e) {
         e.preventDefault();
         const csvs = inputFiles[0].files;

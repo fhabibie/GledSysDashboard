@@ -44,32 +44,34 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Files</h6>
             </div>
-            <div class="card-body table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Filename</th>
-                            <th scope="col">Uploaded At</th>
-                            <th scope="col">Download</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for file in files %}
-                        <tr>
-                            <th scope="row">{{ forloop.counter }}</th>
-                            <td><a href="/upload-lightning/{{ file.id }}">{{ file.files.name }}</a></td>
-                            <td>{{ file.uploaded_at }}</td>
-                            <td>
-                                <a href="{{ file.files.url }}" target="_blank"
-                                    class="btn btn-primary btn-sm">Download</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="filesDataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Filename</th>
+                                <th scope="col">Uploaded At</th>
+                                <th scope="col">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                            <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td><a href="/upload-lightning/{{ file.id }}">{{ file.filename }}</a></td>
+                                <td>{{ file.uploaded_at }}</td>
+                                <td>
+                                    <a href="{{ file.files.url }}" target="_blank"
+                                        class="btn btn-primary btn-sm">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
 
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
         </div>
@@ -79,4 +81,13 @@
 
 
 
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function() {
+    $('#filesDataTable').DataTable();
+    });
+
+</script>
 {% endblock %}

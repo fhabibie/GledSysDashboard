@@ -19,6 +19,7 @@
         rel="stylesheet">
 
     <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
     <!-- Custom styles for this template-->
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
@@ -106,7 +107,7 @@
                         <a class="collapse-item" href="/">Density Maps</a>
                         <div class="collapse-divider"></div>
                         <h6 class="collapse-header">Statistical:</h6>
-                        <a class="collapse-item" href="/">Temporal</a>
+                        <a class="collapse-item" href="/maps/lightning-temporal-statistics/">Temporal</a>
                         <a class="collapse-item" href="/">Spatial</a>
                         <a class="collapse-item" href="/">Temporal and Spatial</a>
                     </div>
@@ -278,6 +279,10 @@
     <!-- Page level plugins -->
     <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+    <!-- Datepicker and MomentJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <!-- App.js -->
     <script src="{% static 'js/app.js' %}"></script>
