@@ -4,7 +4,8 @@ import pandas as pd
 import pygmt
 import base64
 
-def get_distribution_map(obj):
+def get_distribution_map(obj, boundary):
+    # Boundary (min_long, min_lat, max_long, max_lat)
     # df = gpd.GeoDataFrame(list(obj), columns=["datetime_utc", "coord", "type"])
     df = pd.DataFrame(list(obj), columns=["datetime_utc", "latitude", "longitude", "type"])
     df_gcp = df[df.type == 0]
@@ -12,10 +13,10 @@ def get_distribution_map(obj):
     df_ic = df[df.type == 2]
 
     region = [
-        df.longitude.min() - 8,
-        df.longitude.max() + 8,
-        df.latitude.min() - 8,
-        df.latitude.max() + 8,
+        boundary[0] - 2,
+        boundary[2] + 2,
+        boundary[1] - 2,
+        boundary[3] + 2,
     ]
 
     # region = [ 94, 144, -12, 10] # Indonesia reg

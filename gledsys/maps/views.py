@@ -3,21 +3,28 @@ from django.http import HttpResponse,JsonResponse
 from modules.chart import get_lightning_bar_chart, get_lightning_pie_chart, get_lightning_pie_chart_plotly, get_lightning_bar_chart_plotly
 from modules.map import get_distribution_map
 from uploads.models import Lightning
+from django.contrib.gis.gdal.envelope import Envelope
+from django.contrib.gis.geos import Polygon, Point
 from django.utils.timezone import make_aware
 from django.utils.dateparse import parse_datetime
 
 
 # Create your views here.
 
-def lighning_distribution_maps(request):
-    query = Lightning.objects.filter(
-            datetime_utc__range = ["2021-02-01T19:16:54+07:00", "2021-02-02T19:16:54+07:00"],
-            latitude__range = [-6.34232915063942, 1.3138862223887],
-            longitude__range = [94.0034031691933, 95.2507765200479],
-            type__in = [0,1,2]).values_list("datetime_utc", "latitude", "longitude", "type")
-    print(len(query))
+def lightning_distribution_map(request):
+    # Returns a polygon object from the given bounding-box, a 4-tuple comprising (xmin, ymin, xmax, ymax).
+    # coord_range = (94, -12, 144, 10)
+    coord_range = (100, -1, 108, 7)
+    boundary_box = Polygon.from_bbox(coord_range)
     
-    dist_map = get_distribution_map(query)
+    query = Lightning.objects.filter(
+            datetime_utc__range = ["2021-02-01T19:16:54+07:00", "2021-02-05T19:16:54+07:00"],
+            coord__within = boundary_box,
+            type__in = [0,1,2]).values_list("datetime_utc", "latitude", "longitude", "type")
+
+    dist_map = ""
+    if len(query) > 0:
+        dist_map = get_distribution_map(query, coord_range)
     context = {
         "page_title": "Lightning Distribution Maps",
         "map": "data:image/png;base64, " + dist_map
@@ -26,21 +33,16 @@ def lighning_distribution_maps(request):
     return render(request, 'lightning_distribution.html', context)
 
 
-def lighning_temporal_chart(request):
-    # Initial Dataset
-    # from django.contrib.gis.geos import Polygon
-
-    # bbox = (-6.9145,53.5958,-5.6085,53.1023)#min_lat,max_lat,min_lng,max_lng 
-    # geom = Polygon.from_bbox(bbox)
-
-    # Location.objects.filter(point__within=geom)
-    
+def lightning_temporal_chart(request):
+    # coord_range = (94, -12, 144, 10)
+    coord_range = (100, -1, 108, 7)
+    boundary_box = Polygon.from_bbox(coord_range)
     
     query = Lightning.objects.filter(
-            datetime_utc__range = ["2020-09-16T19:16:54+07:00", "2021-09-16T19:16:54+07:00"],
-            latitude__range = [-6.34232915063942, 1.3138862223887],
-            longitude__range = [94.0034031691933, 95.2507765200479],
+            datetime_utc__range = ["2021-02-01T19:16:54+07:00", "2021-02-05T19:16:54+07:00"],
+            coord__within = boundary_box,
             type__in = [0,1,2]).values_list("datetime_utc", "type")
+
     bar_chart, pie_chart, bar_plotly, pie_plotly = "", "", "", ""
 
     if len(query) > 0:
@@ -61,17 +63,18 @@ def lighning_temporal_chart(request):
     }
     return render(request, 'lightning_temporal.html', context)
 
-def get_lightning_temporal_chart(request):
+def ajax_lightning_temporal_chart(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == "POST":
         ctype = request.POST.getlist('ctype[]')
         lat_range = request.POST.getlist('latRange[]')
         lon_range = request.POST.getlist('lonRange[]')
         date_range = request.POST.getlist('dateRange[]')
+        
+        boundary_box = Polygon.from_bbox((lon_range[0], lat_range[0], lon_range[1], lat_range[1]))
 
         query = Lightning.objects.filter(
             datetime_utc__range = date_range,
-            latitude__range = lat_range,
-            longitude__range = lon_range,
+            coord__within = boundary_box,
             type__in = ctype,
             ).values_list("datetime_utc", "type")
 

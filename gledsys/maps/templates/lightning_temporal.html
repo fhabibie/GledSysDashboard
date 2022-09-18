@@ -26,12 +26,12 @@
                                         <span class="input-group-text">Min</span>
                                     </div>
                                     <input type="number" class="form-control form-control-sm" id="min-lat"
-                                        placeholder="" value="-6.34232915063942" required>
+                                        placeholder="" value="-1" required>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Max</span>
                                     </div>
                                     <input type="number" class="form-control form-control-sm" id="max-lat"
-                                        placeholder="" value="1.3138862223887" required>
+                                        placeholder="" value="7" required>
                                 </div>
 
                             </div>
@@ -43,12 +43,12 @@
                                         <span class="input-group-text">Min</span>
                                     </div>
                                     <input type="number" class="form-control form-control-sm" id="min-lon"
-                                        placeholder="" value="94.0034031691933" required>
+                                        placeholder="" value="100" required>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Max</span>
                                     </div>
                                     <input type="number" class="form-control form-control-sm" id="max-lon"
-                                        placeholder="" value="95.2507765200479" required>
+                                        placeholder="" value="108" required>
                                 </div>
 
                             </div>
@@ -185,8 +185,11 @@
         const filterForm = $('#filter-form');
         const submitBtn = $('#filter-btn');
 
-        var start = moment().subtract(24, 'month');
-        var end = moment();
+        // var start = moment().subtract(24, 'month');
+        // var end = moment();
+        var start = moment('2021-02-01T19:16:54+07:00');
+        var end = moment('2021-02-05T19:16:54+07:00');
+
         var data = {}
         function callbackDateRange(startDate, endDate) {
             start = startDate
