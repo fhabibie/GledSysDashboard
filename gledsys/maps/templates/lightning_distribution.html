@@ -8,44 +8,104 @@
     <!-- Content Column -->
     <div class="col-lg-12 mb-4">
 
-        <!-- Project Card Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
+            <!-- Card Header - Accordion -->
+            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseCardExample">
                 <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
-            </div>
-            <div class="card-body">
-                <form id="upload-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
+            </a>
+            <div class="collapse show" id="collapseCardExample">
+                <div class="card-body">
+                    <form id="filter-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="col-lg-10 mb-3">
-                            <input id="id_files" class="form-control" accept=".csv" type="file" name="files" multiple>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="daterange">Latitude Range</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Min</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="min-lat"
+                                        placeholder="" value="-6.34232915063942" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Max</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="max-lat"
+                                        placeholder="" value="1.3138862223887" required>
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="daterange">Longitude Range</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Min</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="min-lon"
+                                        placeholder="" value="94.0034031691933" required>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Max</span>
+                                    </div>
+                                    <input type="number" class="form-control form-control-sm" id="max-lon"
+                                        placeholder="" value="95.2507765200479" required>
+                                </div>
+
+                            </div>
                         </div>
-                        <div class="col=lg-2">
-                            <button id="upload-btn" class="btn btn-primary w-100" type="submit" disabled>Upload</button>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="daterange">Date and Time Range</label>
+                                <input id="date-range" type="text" name="daterange" class="form-control form-control-sm"
+                                    value="" />
+                            </div>
+
+                            <label>Type</label>
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="0" name="ctype" id="gcp">
+                                    <label class="form-check-label" for="gcp">GC+</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="1" name="ctype" id="gcn">
+                                    <label class="form-check-label" for="gcn">GC-</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="2" name="ctype" id="ic">
+                                    <label class="form-check-label" for="ic">IC</label>
+                                </div>
+                            </div>
+
                         </div>
-                </form>
-                <div id="upload-progress-bar" class="progress my-2 d-none">
-                    <div id="uploaded-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="25"
-                        aria-valuemin="0" aria-valuemax="100"></div>
+
+                    </form>
+
+
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <button id="filter-btn" class="col-md-6 btn btn-primary w-100" type="submit">Process</button>
+                        </div>
+                    </div>
+
                 </div>
-
-                <div id="alert-container"></div>
-
             </div>
         </div>
 
     </div>
 </div>
+
+
 <div class="row">
     <!-- Content Column -->
-    <div class="col-lg-12 mb-4">
+    <div class="col-lg-6 mb-4">
 
         <!-- Project Card Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Distribution Maps</h6>
             </div>
-            <div class="card-body table-responsive">
-                
+            <div class="card-body">
+                <img class="img-fluid" src="{{ map|safe }}"/>
             </div>
         </div>
 
@@ -55,3 +115,94 @@
 
 
 {% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $(function () {
+        function getCookie(name) {
+            var cookieValue = null;
+        
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        
+                        break;
+                    }
+                }
+            }
+        
+            return cookieValue;
+        }
+        
+        const filterForm = $('#filter-form');
+        const submitBtn = $('#filter-btn');
+
+        var start = moment().subtract(24, 'month');
+        var end = moment();
+        var data = {}
+        function callbackDateRange(startDate, endDate) {
+            start = startDate
+            end = endDate
+        }
+
+        $('#date-range').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 5,
+            startDate: start,
+            endDate: end,
+            locale: {
+                format: 'MM/DD/YYYY h:mm A'
+            }
+        }, callbackDateRange);
+
+
+        submitBtn.click(function(e){
+            e.preventDefault();
+
+            var ctype = [];
+            $.each($("input[name='ctype']:checked"), function(){
+                ctype.push($(this).val());
+            });
+
+            var data = {
+                latRange: [$('#min-lat').val(), $('#max-lat').val()],
+                lonRange: [$('#min-lon').val(), $('#max-lon').val()],
+                dateRange: [start.format(), end.format()],
+                ctype: ctype,
+            }
+
+            // $.ajax({
+            //     type: 'POST',
+            //     url: "{% url 'ajax-temporal' %}",
+            //     headers: {'X-CSRFToken': getCookie('csrftoken')},
+            //     data: data,
+            //     success: function (res) {
+            //         if (res.data) {
+            //             $('.chart-message').text("");
+            //             $('#img-bar-chart').removeClass('d-none');
+            //             $('#img-pie-chart').removeClass('d-none');
+            //             $('#img-bar-chart').attr('src', res.data.bar);
+            //             $('#img-pie-chart').attr('src', res.data.pie);
+            //             $('#pie-plotly').html(res.data.pieplotly)
+            //             $('#bar-plotly').html(res.data.barplotly)
+            //         } else {
+            //             $('#img-bar-chart').addClass('d-none');
+            //             $('#img-pie-chart').addClass('d-none');
+            //             $('#pie-plotly').html('');
+            //             $('#bar-plotly').html('');
+            //             $('.chart-message').text('No result found!')
+            //         }
+            //     },
+            //     error: function (err) {
+            //         console.log(err)
+            //     }
+            // })
+        });
+
+    });
+</script>
+
+{% endblock%}
