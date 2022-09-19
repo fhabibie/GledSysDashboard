@@ -110,6 +110,20 @@
         </div>
 
     </div>
+    <!-- Content Column -->
+    <div class="col-lg-6 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps (LeafletJS)</h6>
+            </div>
+            <div class="card-body">
+                <div id="leaflet-map" style="min-height: 510px;"></div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 
@@ -119,6 +133,7 @@
 {% block javascript %}
 <script type="text/javascript">
     $(function () {
+        // TODO: Move to Utils js
         function getCookie(name) {
             var cookieValue = null;
         
@@ -136,6 +151,15 @@
         
             return cookieValue;
         }
+
+        // Init Leaflet Map
+        var y = parseFloat($('#min-lat').val()) + parseFloat($('#max-lat').val())
+        var x = parseFloat($('#min-lon').val()) + parseFloat($('#max-lon').val())
+        var map = L.map('leaflet-map').setView([y/2,x/2], 6);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);  
         
         const filterForm = $('#filter-form');
         const submitBtn = $('#filter-btn');
