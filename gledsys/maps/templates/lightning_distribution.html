@@ -9,12 +9,11 @@
     <div class="col-lg-12 mb-4">
 
         <div class="card shadow mb-4">
-            <!-- Card Header - Accordion -->
-            <a href="#collapseCardExample" class="d-block card-header py-3" data-toggle="collapse" role="button"
-                aria-expanded="true" aria-controls="collapseCardExample">
+            <a href="#collapseFilter" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseFilter">
                 <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
             </a>
-            <div class="collapse show" id="collapseCardExample">
+            <div class="collapse hide" id="collapseFilter">
                 <div class="card-body">
                     <form id="filter-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -93,34 +92,42 @@
 
     </div>
 </div>
-
-
 <div class="row">
     <!-- Content Column -->
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-12 mb-4">
 
         <!-- Project Card Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps</h6>
-            </div>
-            <div class="card-body">
-                <div class="map-message"></div>
-                <img id="pygmt-map" class="img-fluid" src="{{ map|safe }}"/>
+            <a href="#collapseMap1" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseMap1">
+                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps (LeafletJS)</h6>
+            </a>
+            <div class="collapse show" id="collapseMap1">
+                <div class="card-body">
+                    <div id="leaflet-map" style="min-height: 510px;"></div>
+                </div>
             </div>
         </div>
 
     </div>
+</div>
+
+
+<div class="row">
     <!-- Content Column -->
-    <div class="col-lg-6 mb-4">
+    <div class="col-lg-12 mb-4">
 
         <!-- Project Card Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps (LeafletJS)</h6>
-            </div>
-            <div class="card-body">
-                <div id="leaflet-map" style="min-height: 510px;"></div>
+            <a href="#collapseMap2" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseMap2">
+                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps (PyGMT)</h6>
+            </a>
+            <div class="collapse show" id="collapseMap2">
+                <div class="card-body">
+                    <div class="map-message"></div>
+                    <img id="pygmt-map" class="img-fluid" src="{{ map|safe }}" style="max-height: 510px;" />
+                </div>
             </div>
         </div>
 
@@ -166,14 +173,18 @@
         var data = {}
 
         // Init Leaflet Map
-        var y = (parseFloat($('#min-lat').val()) + parseFloat($('#max-lat').val())) / 2;
-        var x = (parseFloat($('#min-lng').val()) + parseFloat($('#max-lng').val())) / 2;
-        
-        var map = L.map('leaflet-map').setView([y, x], 6);
+        var x = (94+144) / 2;
+        var y = (-12+10) / 2;
+
+        var overlayMaps = {}
+        var pointLayer; var bboxLayer;
+
+        var map = L.map('leaflet-map').setView([y,x], 5);
+
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
-        }).addTo(map); 
+        }).addTo(map);
 
         // Handle date picker events
         $('#date-range').daterangepicker({
@@ -202,13 +213,16 @@
                     ctype.push($(this).val());
                 });
 
+            // Cleaning layers
+            bboxLayer && map.removeLayer(bboxLayer);
+            pointLayer && map.removeLayer(pointLayer);
+            
             // Set leafeat view to new coords
-            map.panTo(new L.LatLng((min_lat + max_lat)/2, (min_lng + max_lng)/2))
+            map.setView([(min_lat + max_lat)/2, (min_lng + max_lng)/2], 6)
 
             // Bbox
             var bbox = [[min_lat, min_lng], [max_lat, max_lng]]
-            console.log('bbox', bbox)
-            L.rectangle(bbox, {color: "#ff7800", weight: 2}).addTo(map);
+            bboxLayer = L.rectangle(bbox, {color: "#ff7800", weight: 2}).addTo(map);
 
             var data = {
                 latRange: [min_lat, max_lat],
@@ -216,7 +230,6 @@
                 dateRange: [start.format(), end.format()],
                 ctype: ctype,
             }
-            console.log('REQ', data);
 
             $.ajax({
                 type: 'POST',
@@ -240,7 +253,7 @@
                             fillOpacity: 0.5,
                         };
                         var feature = JSON.parse(res.data.geojson)
-                        L.geoJSON(feature, {
+                        pointLayer = L.geoJSON(feature, {
                             pointToLayer: function (feature, latlng) {
                                 if (feature.properties.type === 0) {
                                     return L.circleMarker(latlng, {...markerOptions, fillColor: "#ff7800"})
@@ -250,8 +263,8 @@
                                     return L.circleMarker(latlng, {...markerOptions, fillColor: "#7703fc"})
                                 }
                             },
-                            onEachFeature: function (feature, layer) {
-                                return layer.bindPopup(`Date: ${feature.properties.datetime_utc}\n 
+                            onEachFeature: function (feature, layer) { 
+                                layer.bindPopup(`Date: ${feature.properties.datetime_utc}\n 
                                         Type: ${feature.properties.type === 0 ? 'GC+' : feature.properties.type === 1 ? 'GC-' : 'IC'}`);
                             }
                         }).addTo(map);
