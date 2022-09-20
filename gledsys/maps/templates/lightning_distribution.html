@@ -42,12 +42,12 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Min</span>
                                     </div>
-                                    <input type="number" class="form-control form-control-sm" id="min-lon"
+                                    <input type="number" class="form-control form-control-sm" id="min-lng"
                                         placeholder="" value="100" required>
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Max</span>
                                     </div>
-                                    <input type="number" class="form-control form-control-sm" id="max-lon"
+                                    <input type="number" class="form-control form-control-sm" id="max-lng"
                                         placeholder="" value="108" required>
                                 </div>
 
@@ -105,7 +105,8 @@
                 <h6 class="m-0 font-weight-bold text-primary">Distribution Maps</h6>
             </div>
             <div class="card-body">
-                <img class="img-fluid" src="{{ map|safe }}"/>
+                <div class="map-message"></div>
+                <img id="pygmt-map" class="img-fluid" src="{{ map|safe }}"/>
             </div>
         </div>
 
@@ -152,28 +153,29 @@
             return cookieValue;
         }
 
-        // Init Leaflet Map
-        var y = parseFloat($('#min-lat').val()) + parseFloat($('#max-lat').val())
-        var x = parseFloat($('#min-lon').val()) + parseFloat($('#max-lon').val())
-        var map = L.map('leaflet-map').setView([y/2,x/2], 6);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);  
-        
+        // Filter Values
         const filterForm = $('#filter-form');
         const submitBtn = $('#filter-btn');
         // var start = moment().subtract(24, 'month');
         // var end = moment();
-        
+
+        // Init Date time
         var start = moment('2021-02-01T19:16:54+07:00');
         var end = moment('2021-02-05T19:16:54+07:00');
+        // Ajax request data
         var data = {}
-        function callbackDateRange(startDate, endDate) {
-            start = startDate
-            end = endDate
-        }
 
+        // Init Leaflet Map
+        var y = (parseFloat($('#min-lat').val()) + parseFloat($('#max-lat').val())) / 2;
+        var x = (parseFloat($('#min-lng').val()) + parseFloat($('#max-lng').val())) / 2;
+        
+        var map = L.map('leaflet-map').setView([y, x], 6);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map); 
+
+        // Handle date picker events
         $('#date-range').daterangepicker({
             timePicker: true,
             timePickerIncrement: 5,
@@ -182,50 +184,87 @@
             locale: {
                 format: 'MM/DD/YYYY h:mm A'
             }
-        }, callbackDateRange);
+        }, function(startDate, endDate) {
+            start = startDate;
+            end = endDate
+        });
 
-
+        // Handle filter button
         submitBtn.click(function(e){
             e.preventDefault();
-
+            var min_lat = parseFloat($('#min-lat').val());
+            var max_lat = parseFloat($('#max-lat').val());
+            var min_lng = parseFloat($('#min-lng').val());
+            var max_lng = parseFloat($('#max-lng').val());
+            // CNimbus Type
             var ctype = [];
-            $.each($("input[name='ctype']:checked"), function(){
-                ctype.push($(this).val());
-            });
+                $.each($("input[name='ctype']:checked"), function(){
+                    ctype.push($(this).val());
+                });
+
+            // Set leafeat view to new coords
+            map.panTo(new L.LatLng((min_lat + max_lat)/2, (min_lng + max_lng)/2))
+
+            // Bbox
+            var bbox = [[min_lat, min_lng], [max_lat, max_lng]]
+            console.log('bbox', bbox)
+            L.rectangle(bbox, {color: "#ff7800", weight: 2}).addTo(map);
 
             var data = {
-                latRange: [$('#min-lat').val(), $('#max-lat').val()],
-                lonRange: [$('#min-lon').val(), $('#max-lon').val()],
+                latRange: [min_lat, max_lat],
+                lonRange: [min_lng, max_lng],
                 dateRange: [start.format(), end.format()],
                 ctype: ctype,
             }
+            console.log('REQ', data);
 
-            // $.ajax({
-            //     type: 'POST',
-            //     url: "{% url 'ajax-temporal' %}",
-            //     headers: {'X-CSRFToken': getCookie('csrftoken')},
-            //     data: data,
-            //     success: function (res) {
-            //         if (res.data) {
-            //             $('.chart-message').text("");
-            //             $('#img-bar-chart').removeClass('d-none');
-            //             $('#img-pie-chart').removeClass('d-none');
-            //             $('#img-bar-chart').attr('src', res.data.bar);
-            //             $('#img-pie-chart').attr('src', res.data.pie);
-            //             $('#pie-plotly').html(res.data.pieplotly)
-            //             $('#bar-plotly').html(res.data.barplotly)
-            //         } else {
-            //             $('#img-bar-chart').addClass('d-none');
-            //             $('#img-pie-chart').addClass('d-none');
-            //             $('#pie-plotly').html('');
-            //             $('#bar-plotly').html('');
-            //             $('.chart-message').text('No result found!')
-            //         }
-            //     },
-            //     error: function (err) {
-            //         console.log(err)
-            //     }
-            // })
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'ajax-distribution' %}",
+                headers: {'X-CSRFToken': getCookie('csrftoken')},
+                dataType: 'json',
+                data: data,
+                success: function (res) {
+                    if (res.data) {
+                        // Pygmt Map
+                        $('.map-message').text("");
+                        $('#pygmt-map').removeClass('d-none');
+                        $('#pygmt-map').attr('src', res.data.map);
+
+                        // Leaflet Map
+                        var markerOptions = {
+                            radius: 5,
+                            color: "#000",
+                            weight: 1,
+                            opacity: 0.5,
+                            fillOpacity: 0.5,
+                        };
+                        var feature = JSON.parse(res.data.geojson)
+                        L.geoJSON(feature, {
+                            pointToLayer: function (feature, latlng) {
+                                if (feature.properties.type === 0) {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#ff7800"})
+                                } else if (feature.properties.type === 1) {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#94fc03"})
+                                } else {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#7703fc"})
+                                }
+                            },
+                            onEachFeature: function (feature, layer) {
+                                return layer.bindPopup(`Date: ${feature.properties.datetime_utc}\n 
+                                        Type: ${feature.properties.type === 0 ? 'GC+' : feature.properties.type === 1 ? 'GC-' : 'IC'}`);
+                            }
+                        }).addTo(map);
+
+                    } else {
+                        $('#pygmt-map').addClass('d-none');
+                        $('.map-message').text('No result found!')
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            })
         });
 
     });
