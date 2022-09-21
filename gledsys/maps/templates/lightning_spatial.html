@@ -70,10 +70,13 @@
 
                                 </div>
                                 <div class="tab-pane fade" id="shp" role="tabpanel" aria-labelledby="shp-query">
-                                    <div class="mt-3">
-                                        <label for="formFileSm" class="form-label">Upload Shapefile</label>
-                                        <input class="form-control form-control-sm" accept=".shp" id="shp-file" type="file">
-                                      </div>
+                                    <div class="card mt-2 border-left-warning">
+                                        <div class="card-body">
+                                            <label for="formFileSm" class="form-label">Upload ZIP file that contains <code>*.shp, *.shx, *.prj, *dbf</code></label>
+                                            <input class="form-control form-control-sm" accept=".zip" id="shp-file" type="file">
+                                        
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane fade" id="savedshp" role="tabpanel" aria-labelledby="savedshp-query">
                                     <div class="form-group mt-3">

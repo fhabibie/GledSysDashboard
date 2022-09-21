@@ -13,6 +13,7 @@ from django.contrib.gis.gdal import DataSource
 import geopandas as gpd
 import pandas as pd
 from shapely import wkt
+from django.contrib.gis.geos import GEOSGeometry
 
 
 # Create your views here.
@@ -162,19 +163,17 @@ def ajax_lightning_spatial(request):
                 return JsonResponse({"success": True,}, status = 200)
 
         elif query_type == 'shp-query':
+            print('SHP Query')
             shp_file = request.FILES.getlist('shp')[0]
             obj  = SavedShapefile.objects.create(filename=shp_file, shp_file= shp_file)
+            print('Saved SHP', obj.filename)
 
         elif query_type == 'savedshp-query':
             shp_id = request.POST.getlist('shpId')[0]
             shp = SavedShapefile.objects.get(id = shp_id)
-            # print('get shp file by id', shp.path())
-            # print('path', shp.shp_file)
+            
             df = gpd.read_file(shp.shp_file.path)
             polys = df.to_json()
-
-            ds = DataSource(shp.shp_file.path)
-            geoms = ds[0].get_geoms(True)
 
             query = Lightning.objects.filter(
                 datetime_utc__range = date_range,
@@ -182,8 +181,10 @@ def ajax_lightning_spatial(request):
             )
             if len(query) > 0:
                 query_res = None
-                for geo in geoms:
-                    tmp_query = query.filter(coord__within = geo)
+                for index, row in df.iterrows():
+                    tmp_geom = GEOSGeometry(row.geometry.wkt)
+                    print('Query Geom {}/{}'.format(index+1, df.shape[0]))
+                    tmp_query = query.filter(coord__within = tmp_geom)
                     if query_res == None:
                         query_res = tmp_query
                     elif len(tmp_query) > 0:
