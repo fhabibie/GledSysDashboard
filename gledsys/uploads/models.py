@@ -21,3 +21,15 @@ class Lightning(models.Model):
     longitude = models.FloatField()
     coord = models.PointField()
     type = models.IntegerField()
+
+
+class SavedShapefile(models.Model):
+    filename = models.CharField(max_length=255)
+    shp_file = models.FileField(upload_to="shp", null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"File: {self.filename}"
+
+    def path(self):
+        return self.shp_file.path
