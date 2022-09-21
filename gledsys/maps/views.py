@@ -168,6 +168,30 @@ def ajax_lightning_spatial(request):
             obj  = SavedShapefile.objects.create(filename=shp_file, shp_file= shp_file)
             print('Saved SHP', obj.filename)
 
+            df = gpd.read_file(obj.shp_file.path)
+            polys = df.to_json()
+
+            query = Lightning.objects.filter(
+                datetime_utc__range = date_range,
+                type__in = ctype,
+            )
+            if len(query) > 0:
+                query_res = None
+                for index, row in df.iterrows():
+                    tmp_geom = GEOSGeometry(row.geometry.wkt)
+                    print('Query Geom {}/{}'.format(index+1, df.shape[0]))
+                    tmp_query = query.filter(coord__within = tmp_geom)
+                    if query_res == None:
+                        query_res = tmp_query
+                    elif len(tmp_query) > 0:
+                        query_res = query_res | tmp_query
+
+                points = serialize('geojson', query_res, geometry_field='coord', fields=('type', 'datetime_utc'))
+
+                return JsonResponse({"success": True, "data": {"polys": polys, "points": points}}, status = 200)
+            else:
+                return JsonResponse({"success": True,}, status = 200)
+
         elif query_type == 'savedshp-query':
             shp_id = request.POST.getlist('shpId')[0]
             shp = SavedShapefile.objects.get(id = shp_id)
