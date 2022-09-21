@@ -109,7 +109,7 @@
                         <div class="collapse-divider"></div>
                         <h6 class="collapse-header">Statistical:</h6>
                         <a class="collapse-item" href="/maps/lightning-temporal-statistics/">Temporal</a>
-                        <a class="collapse-item" href="/">Spatial</a>
+                        <a class="collapse-item" href="/maps/lightning-spatial-statistics">Spatial</a>
                         <a class="collapse-item" href="/">Temporal and Spatial</a>
                     </div>
                 </div>
@@ -287,9 +287,10 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
     <!-- App.js -->
-    <script src="{% static 'js/app.js' %}"></script>
+    <!-- <script src="{% static 'js/app.js' %}"></script> -->
     {% block javascript %} {% endblock %}
 
 

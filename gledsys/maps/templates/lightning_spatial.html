@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Content Row -->
+
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-12 mb-4">
+
+        <div class="card shadow mb-4">
+            <a href="#collapseFilter" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseFilter">
+                <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
+            </a>
+            <div class="collapse show" id="collapseFilter">
+                <div class="card-body">
+                    <form id="filter-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="col-md-6 mb-3">
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="bbox-query" data-toggle="tab" data-target="#bbox" type="button" role="tab"
+                                        aria-controls="bbox" aria-selected="true">Boundary Box</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="shp-query" data-toggle="tab" data-target="#shp" type="button" role="tab"
+                                        aria-controls="shp" aria-selected="false">SHP Files</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="savedshp-query" data-toggle="tab" data-target="#savedshp" type="button" role="tab"
+                                        aria-controls="savedshp" aria-selected="false">Saved SHP</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="myTabContent">
+                                <div class="tab-pane fade show active" id="bbox" role="tabpanel" aria-labelledby="bbox-query">
+                                    <div class="form-group mt-3">
+                                        <label for="daterange">Latitude Range</label>
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Min</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" id="min-lat"
+                                                placeholder="" value="-1" required>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Max</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" id="max-lat"
+                                                placeholder="" value="7" required>
+                                        </div>
+        
+                                    </div>
+        
+                                    <div class="form-group">
+                                        <label for="daterange">Longitude Range</label>
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Min</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" id="min-lng"
+                                                placeholder="" value="100" required>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">Max</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" id="max-lng"
+                                                placeholder="" value="108" required>
+                                        </div>
+        
+                                    </div>
+
+                                </div>
+                                <div class="tab-pane fade" id="shp" role="tabpanel" aria-labelledby="shp-query">
+                                    <div class="mt-3">
+                                        <label for="formFileSm" class="form-label">Upload Shapefile</label>
+                                        <input class="form-control form-control-sm" accept=".shp" id="shp-file" type="file">
+                                      </div>
+                                </div>
+                                <div class="tab-pane fade" id="savedshp" role="tabpanel" aria-labelledby="savedshp-query">
+                                    <div class="form-group mt-3">
+                                        <label for="saved-shp-option">Select shapefile</label>
+                                        <select size="4" class="form-control" id="saved-shp-option">
+                                            {% for shp in shp_files %}
+                                             <option value="{{ shp.id }}">{{ shp.filename }}</option>
+                                             {% endfor%}
+                                        </select>
+                                      </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-group">
+                                <label for="daterange">Date and Time Range</label>
+                                <input id="date-range" type="text" name="daterange" class="form-control form-control-sm"
+                                    value="" />
+                            </div>
+
+                            <label>Type</label>
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="0" name="ctype" id="gcp">
+                                    <label class="form-check-label" for="gcp">GC+</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="1" name="ctype" id="gcn">
+                                    <label class="form-check-label" for="gcn">GC-</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" checked="" value="2" name="ctype" id="ic">
+                                    <label class="form-check-label" for="ic">IC</label>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <button id="filter-btn" class="col-md-6 btn btn-primary w-100" type="submit">Process</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <!-- Content Column -->
+    <div class="col-lg-6 mb-4">
+
+        <!-- Project Card Example -->
+        <div class="card shadow mb-4">
+            <a href="#collapseMap1" class="d-block card-header py-3" data-toggle="collapse" role="button"
+                aria-expanded="true" aria-controls="collapseMap1">
+                <h6 class="m-0 font-weight-bold text-primary">Distribution Maps (LeafletJS)</h6>
+            </a>
+            <div class="collapse show" id="collapseMap1">
+                <div class="card-body">
+                    <div id="leaflet-container">
+                        <div id="leaflet-map" style="min-height: 510px;"></div>
+                    </div>
+                    <a href="#" id="download-map" class="btn btn-primary">Download</a>
+                    <div id="map-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $(async function () {
+        // TODO: Move to Utils js
+        function getCookie(name) {
+            var cookieValue = null;
+        
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        
+                        break;
+                    }
+                }
+            }
+        
+            return cookieValue;
+        }
+
+        var currentTab = 'bbox-query'
+        $('button[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            currentTab = $(this).attr('id')
+        })
+
+        // Filter Values
+        const filterForm = $('#filter-form');
+        const submitBtn = $('#filter-btn');
+
+        // Init Date time
+        var start = moment('2021-02-01T19:16:54+07:00');
+        var end = moment('2021-02-05T19:16:54+07:00');
+       
+        // Init Leaflet Map
+        var x = (94+144) / 2;
+        var y = (-12+10) / 2;
+
+        var overlayMaps = {}
+        var pointLayer; var boundaryLayer;
+
+        var map = L.map('leaflet-map').setView([y,x], 5);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Handle date picker events
+        $('#date-range').daterangepicker({
+            timePicker: true,
+            timePickerIncrement: 5,
+            startDate: start,
+            endDate: end,
+            locale: {
+                format: 'MM/DD/YYYY h:mm A'
+            }
+        }, function(startDate, endDate) {
+            start = startDate;
+            end = endDate
+        });
+        
+        // Handle Download Map
+        $('#download-map').click(async function(e) {
+            e.preventDefault();
+            var dimensions = map.getSize();
+
+            const mapElement = $("#leaflet-container")[0];
+            domtoimage.toPng(mapElement, {width: dimensions.x, heigt: dimensions.y})
+                .then(function (dataUrl) {
+                    var img = new Image();
+                    img.src = dataUrl;
+                    var w = window.open("");
+                    w.document.write(img.outerHTML);
+                })
+                .catch(function (error) {
+                    console.error('oops, something went wrong!', error);
+                });
+        });
+
+        // Handle filter button
+        submitBtn.click(function(e){
+            e.preventDefault();
+            // Form Data
+            var fd = new FormData();
+            fd.append('queryType', currentTab);
+            fd.append('start', start.format());
+            fd.append('end', end.format());
+            // CNimbus Type
+            $.each($("input[name='ctype']:checked"), function(){
+                fd.append('ctype[]', $(this).val());
+            });
+
+
+            if (currentTab === 'bbox-query') {
+                var min_lat = parseFloat($('#min-lat').val());
+                var max_lat = parseFloat($('#max-lat').val());
+                var min_lng = parseFloat($('#min-lng').val());
+                var max_lng = parseFloat($('#max-lng').val());
+
+                fd.append('minLat', min_lat);
+                fd.append('maxLat', max_lat);
+                fd.append('minLng', min_lng);
+                fd.append('maxLng', max_lng);
+                console.log('boundary box query')
+            } else if (currentTab === 'shp-query') {
+                var shpFile = $('#shp-file')[0].files;
+                fd.append('shp', shpFile[0]);
+
+                console.log('shpfile query', shpFile);
+            } else if (currentTab === 'savedshp-query') {
+                var option = $('#saved-shp-option').val();
+                fd.append('shpId', option)
+            }
+            
+            // Cleaning layers
+            boundaryLayer && map.removeLayer(boundaryLayer);
+            pointLayer && map.removeLayer(pointLayer);
+            
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'ajax-spatial' %}",
+                headers: {'X-CSRFToken': getCookie('csrftoken')},
+                processData: false,
+                contentType: false,
+                cache: false,
+                enctype: 'multipart/form-data',
+                data: fd,
+                success: function (res) {
+                    if (res.data) {
+                        $('.map-message').text("");
+                        // Leaflet Map
+                        var markerOptions = {
+                            radius: 5,
+                            color: "#000",
+                            weight: 1,
+                            opacity: 0.5,
+                            fillOpacity: 0.5,
+                        };
+                        var feature = JSON.parse(res.data.points);
+                        var poly = JSON.parse(res.data.polys);
+
+                        boundaryLayer = L.geoJSON(poly).addTo(map);
+                        map.fitBounds(boundaryLayer.getBounds())
+
+                        pointLayer = L.geoJSON(feature, {
+                            pointToLayer: function (feature, latlng) {
+                                if (feature.properties.type === 0) {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#ff7800"})
+                                } else if (feature.properties.type === 1) {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#94fc03"})
+                                } else {
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#7703fc"})
+                                }
+                            },
+                            onEachFeature: function (feature, layer) { 
+                                layer.bindPopup(`Date: ${feature.properties.datetime_utc}\n 
+                                        Type: ${feature.properties.type === 0 ? 'GC+' : feature.properties.type === 1 ? 'GC-' : 'IC'}`);
+                            }
+                        }).addTo(map);
+
+                    } else {
+                        $('.map-message').text('No result found!')
+                    }
+                },
+                error: function (err) {
+                    console.log(err)
+                }
+            })
+        });
+    });
+</script>
+
+{% endblock%}
