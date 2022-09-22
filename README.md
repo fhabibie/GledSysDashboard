@@ -1,7 +1,9 @@
 # GledSys
-GledSys, a GIS web platform that build with [GeoDjango](https://docs.djangoproject.com/en/4.1/ref/contrib/gis/) and [PostgreSQL](https://www.postgresql.org/) with [PostGIS](https://postgis.net/) extension
+![GledSys](docs/img/logo.png)
+> GledSys, a GIS web platform that build with [GeoDjango](https://docs.djangoproject.com/en/4.1/ref/contrib/gis/) and [PostgreSQL](https://www.postgresql.org/) with [PostGIS](https://postgis.net/) extension
 
-
+## Preview
+![Preview](docs/img//thumbnail.jpg)
 ## Table of Contents
 1. [Prerequisities](#prerequisities)
 2. [Installation](#installation)
@@ -94,13 +96,14 @@ For more docker-compose commands, please read the following [documentations](htt
 
 ### Migrating the database
 ``` 
+# Makemigration
 docker-compose exec web python manage.py makemigrations
 
 # Migrate the database
 docker-compose exec web python manage.py migrate
 ```
 
-Make superuser for django admin
+Create superuser for django admin
 
 ```
 docker-compose exec web python manage.py createsuperuser
@@ -133,23 +136,90 @@ docker system prune
 
 ## Manual Installation
 ### Install Geospatial Libraries
+You need to install GEOS, PROJ, GDAL, and GMT Spatial libraries. Follow external links to install these libraries.
+* [GEOS](http://libgeos.org/usage/download/)
+* [PROJ](https://proj.org/install.html)
+* [GDAL/OGR](https://gdal.org/download.html)
+* [GMT](https://www.generic-mapping-tools.org/download/)
 
 
-
-### Install PostGIS
+### Install PostgreSQL + PostGIS
+* [PostgreSQL](https://www.postgresql.org/download/)
+* [PostGIS](https://postgis.net/install/)
 
 ### Install Python or Python Distribution
+* [Python3](https://www.python.org/downloads/)
+* [Anaconda](https://www.anaconda.com/products/distribution)
 
-### Install Django and Its Dependecies
 
+### Clone Django Project
+Clone the GledSys repository
+```
+git clone https://github.com/fhabibie/GledSysDashboard.git
+```
+
+or you can download the ZIP file project
+```
+wget https://github.com/fhabibie/GledSysDashboard/archive/refs/heads/main.zip
+```
 
 ### Connecting Django to PostGIS database
+Setup database connection through ```settings.py```
+```
+...
+# Database
+# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.environ.get('POSTGRES_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': 5432,
+    }
+}
+```
 
+### Install Django and its dependecies
+Create python virtual env (virtualenv, conda env, or venv)
+Using venv
+```
+python -m venv myenv
+source myenv/bin/activate
+
+```
+Using conda 
+```
+conda create --name myenv
+conda activate myenv
+
+```
+
+Install python dependencies
+```
+pip install -r gledsys\requirements.txt
+
+# conda
+conda install --file gledsys\requirements.txt
+```
 ### Migrate Database
+Migrate database
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+Create django-admin user
+```
+python manage.py createsuperuser
+```
 
 
 ### Run Django Project
+```
+python manage.py runserver
+```
 
 ## Usage
 Run
