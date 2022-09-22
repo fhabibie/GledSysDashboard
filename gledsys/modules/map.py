@@ -4,7 +4,8 @@ import pandas as pd
 import pygmt
 import base64
 
-def get_distribution_map(obj=[], boundary=(94, -12, 144, 10)):
+# Return PyGMT Map
+def get_density_map(obj=[], boundary=(94, -12, 144, 10)):
     # Boundary (min_long, min_lat, max_long, max_lat)
     if len(obj) <= 0:
         # Return basemap

@@ -52,6 +52,11 @@ def get_lightning_bar_chart_plotly(obj):
     df['datetime_utc'] = df['datetime_utc'].dt.strftime('%m/%d/%Y')
     df['category'] = df['type'].apply(lambda x: 'IC' if x == 2 else 'GC-' if x == 1 else 'GC+')
     df = df.groupby(['datetime_utc', 'category'], as_index=False).size()
-    fig = px.bar(df,x="datetime_utc", y="size", color="category", title="Bar chart")
+    fig = px.bar(df,x="datetime_utc", y="size", color="category", title="Bar chart", 
+        color_discrete_map={
+            'GC+': '#ff7800',
+            'GC-': '#94fc03',
+            'IC': '#7703fc',
+        })
 
     return fig.to_html()

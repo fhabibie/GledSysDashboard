@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from modules.chart import get_lightning_bar_chart, get_lightning_pie_chart, get_lightning_pie_chart_plotly, get_lightning_bar_chart_plotly
-from modules.map import get_distribution_map
+from modules.map import get_density_map
 from uploads.models import Lightning, LightningFiles, SavedShapefile
 from django.contrib.gis.gdal.envelope import Envelope
 from django.contrib.gis.geos import Polygon, Point
@@ -20,10 +20,8 @@ from django.contrib.gis.geos import GEOSGeometry
 
 def lightning_distribution_map(request):
     # Returns an empty map
-    dist_map = get_distribution_map()
     context = {
         "page_title": "Lightning Distribution Maps",
-        "map": "data:image/png;base64, " + dist_map,
     }
     
     return render(request, 'lightning_distribution.html', context)
@@ -43,13 +41,47 @@ def ajax_lightning_distribution_map(request):
             datetime_utc__range = date_range,
             coord__within = boundary_box,
             type__in = ctype)
-        query_map = query.values_list("datetime_utc", "latitude", "longitude", "type")
         geojson = {}
+        if len(query) > 0:
+            geojson = serialize('geojson', query, geometry_field='coord', fields=('type', 'datetime_utc'))
+            return JsonResponse({"success":True, "data": {"geojson": geojson}}, status = 200)
+        else:
+            return JsonResponse({"success": True,}, status = 200)
+
+        
+    return JsonResponse({"success": False}, status=400)
+
+
+def lightning_density_map(request):
+    # Returns an empty map
+    dist_map = get_density_map()
+    context = {
+        "page_title": "Lightning Density Maps",
+        "map": "data:image/png;base64, " + dist_map,
+    }
+    
+    return render(request, 'lightning_density.html', context)
+
+def ajax_lightning_density_map(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == "POST":
+        ctype = request.POST.getlist('ctype[]')
+        lat_range = request.POST.getlist('latRange[]')
+        lon_range = request.POST.getlist('lonRange[]')
+        date_range = request.POST.getlist('dateRange[]')
+        
+        # Create a polygon object from the given bounding-box, a 4-tuple comprising (xmin, ymin, xmax, ymax).
+        coord_range = (float(lon_range[0]), float(lat_range[0]), float(lon_range[1]), float(lat_range[1]))
+        boundary_box = Polygon.from_bbox(coord_range)
+
+        query = Lightning.objects.filter(
+            datetime_utc__range = date_range,
+            coord__within = boundary_box,
+            type__in = ctype).values_list("datetime_utc", "latitude", "longitude", "type")
+        
         dist_map = ""
         if len(query) > 0:
-            dist_map = get_distribution_map(query_map, coord_range)
-            geojson = serialize('geojson', query, geometry_field='coord', fields=('type', 'datetime_utc'))
-            return JsonResponse({"success":True, "data": {"map": "data:image/png;base64, " + dist_map, "geojson": geojson}}, status = 200)
+            dist_map = get_density_map(query, coord_range)
+            return JsonResponse({"success":True, "data": {"map": "data:image/png;base64, " + dist_map}}, status = 200)
         else:
             return JsonResponse({"success": True,}, status = 200)
 
@@ -122,11 +154,9 @@ def ajax_lightning_temporal_chart(request):
 
 def lightning_spatial_chart(request):
     # Returns an empty map
-    dist_map = get_distribution_map()
     shp = SavedShapefile.objects.all()
     context = {
         "page_title": "Lightning Spatial Statistics",
-        "map": "data:image/png;base64, " + dist_map,
         "shp_files": shp,
     }
     
@@ -156,9 +186,17 @@ def ajax_lightning_spatial(request):
                 coord__within = boundary_box,
                 type__in = ctype)
             
+            print('Query on boundary box', coord_range)
+            print('Result len', len(query))
             if len(query) > 0:
                 points = serialize('geojson', query, geometry_field='coord', fields=('type', 'datetime_utc'))
-                return JsonResponse({"success":True, "data": {"points": points, "polys": boundary_box.json}}, status = 200)
+                bar_plotly = get_lightning_bar_chart_plotly(query.values_list("datetime_utc", "type"))
+                data = {
+                    "points": points,
+                    "polys": boundary_box.json,
+                    "barplotly": bar_plotly
+                }
+                return JsonResponse({"success":True, "data": data}, status = 200)
             else:
                 return JsonResponse({"success": True,}, status = 200)
 
@@ -187,8 +225,13 @@ def ajax_lightning_spatial(request):
                         query_res = query_res | tmp_query
 
                 points = serialize('geojson', query_res, geometry_field='coord', fields=('type', 'datetime_utc'))
-
-                return JsonResponse({"success": True, "data": {"polys": polys, "points": points}}, status = 200)
+                bar_plotly = get_lightning_bar_chart_plotly(query.values_list("datetime_utc", "type"))
+                data = {
+                    "points": points,
+                    "polys": polys,
+                    "barplotly": bar_plotly
+                }
+                return JsonResponse({"success":True, "data": data}, status = 200)
             else:
                 return JsonResponse({"success": True,}, status = 200)
 
@@ -215,8 +258,13 @@ def ajax_lightning_spatial(request):
                         query_res = query_res | tmp_query
 
                 points = serialize('geojson', query_res, geometry_field='coord', fields=('type', 'datetime_utc'))
-
-                return JsonResponse({"success": True, "data": {"polys": polys, "points": points}}, status = 200)
+                bar_plotly = get_lightning_bar_chart_plotly(query.values_list("datetime_utc", "type"))
+                data = {
+                    "points": points,
+                    "polys": polys,
+                    "barplotly": bar_plotly
+                }
+                return JsonResponse({"success":True, "data": data}, status = 200)
             else:
                 return JsonResponse({"success": True,}, status = 200)
 
