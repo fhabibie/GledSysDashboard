@@ -75,17 +75,15 @@
                                 </div>
                             </div>
 
+                            <div class="form-group">
+                                <button id="filter-btn" class="col-md-6 mt-3 btn btn-primary w-100" type="submit">
+                                    Process
+                                </button>
+                            </div>
+
                         </div>
 
                     </form>
-
-
-                    <div class="row justify-content-end">
-                        <div class="col-md-6">
-                            <button id="filter-btn" class="col-md-6 btn btn-primary w-100" type="submit">Process</button>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -167,6 +165,10 @@
         // Handle filter button
         submitBtn.click(function(e){
             e.preventDefault();
+            // Reset Button
+            submitBtn.text('Loading...');
+            submitBtn.prop('disabled', true);
+
             var min_lat = parseFloat($('#min-lat').val());
             var max_lat = parseFloat($('#max-lat').val());
             var min_lng = parseFloat($('#min-lng').val());
@@ -197,9 +199,17 @@
                         $('#pygmt-map').removeClass('d-none');
                         $('#pygmt-map').attr('src', res.data.map);
 
+                        // Reset Button
+                        submitBtn.text('Process');
+                        submitBtn.prop('disabled', false);
+
                     } else {
                         $('#pygmt-map').addClass('d-none');
-                        $('.map-message').text('No result found!')
+                        $('.map-message').text('No result found!');
+
+                        // Reset Button
+                        submitBtn.text('Process');
+                        submitBtn.prop('disabled', false);
                     }
                 },
                 error: function (err) {
