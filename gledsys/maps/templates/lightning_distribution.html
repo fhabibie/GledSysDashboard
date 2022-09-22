@@ -227,11 +227,11 @@
                         pointLayer = L.geoJSON(feature, {
                             pointToLayer: function (feature, latlng) {
                                 if (feature.properties.type === 0) {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#ff7800"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#636EFA"})
                                 } else if (feature.properties.type === 1) {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#94fc03"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#EF553B"})
                                 } else {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#7703fc"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#00CC96"})
                                 }
                             },
                             onEachFeature: function (feature, layer) { 

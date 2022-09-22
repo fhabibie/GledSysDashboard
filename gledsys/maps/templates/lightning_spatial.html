@@ -13,7 +13,7 @@
                 aria-expanded="true" aria-controls="collapseFilter">
                 <h6 class="m-0 font-weight-bold text-primary">Filter</h6>
             </a>
-            <div class="collapse show" id="collapseFilter">
+            <div class="collapse hide" id="collapseFilter">
                 <div class="card-body">
                     <form id="filter-form" class="row g-3" action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -72,7 +72,7 @@
                                 <div class="tab-pane fade" id="shp" role="tabpanel" aria-labelledby="shp-query">
                                     <div class="card mt-2 border-left-warning">
                                         <div class="card-body">
-                                            <label for="formFileSm" class="form-label">Upload ZIP file that contains <code>*.shp, *.shx, *.prj, *dbf</code></label>
+                                            <label for="formFileSm" class="form-label">Upload ZIP file that contains <code>*.shp, *.shx, *.prj, *.dbf</code></label>
                                             <input class="form-control form-control-sm" accept=".zip" id="shp-file" type="file">
                                         
                                         </div>
@@ -113,17 +113,13 @@
                                     <label class="form-check-label" for="ic">IC</label>
                                 </div>
                             </div>
-
+                            <div class="form-group">
+                                <button id="filter-btn" class="col-md-6 mt-3 btn btn-primary w-100" type="submit">
+                                    Process
+                                </button>
+                            </div>
                         </div>
-
                     </form>
-
-
-                    <div class="row justify-content-end">
-                        <div class="col-md-6">
-                            <button id="filter-btn" class="col-md-6 btn btn-primary w-100" type="submit">Process</button>
-                        </div>
-                    </div>
 
                 </div>
             </div>
@@ -132,10 +128,8 @@
     </div>
 </div>
 <div class="row">
-    <!-- Content Column -->
+    <!-- Leaflet Map -->
     <div class="col-lg-6 mb-4">
-
-        <!-- Project Card Example -->
         <div class="card shadow mb-4">
             <a href="#collapseMap1" class="d-block card-header py-3" data-toggle="collapse" role="button"
                 aria-expanded="true" aria-controls="collapseMap1">
@@ -150,6 +144,19 @@
                     <div id="map-message"></div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- Stacked Bar Plotly -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Bar Chart (Plotly)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-message">No result found!</div>
+                <div id="bar-plotly"></div>
+            </div>
+           
         </div>
     </div>
 </div>
@@ -240,6 +247,10 @@
         // Handle filter button
         submitBtn.click(function(e){
             e.preventDefault();
+            // Set Button to disabled
+            submitBtn.text('Loading...');
+            submitBtn.prop('disabled', true);
+
             // Form Data
             var fd = new FormData();
             fd.append('queryType', currentTab);
@@ -261,12 +272,11 @@
                 fd.append('maxLat', max_lat);
                 fd.append('minLng', min_lng);
                 fd.append('maxLng', max_lng);
-                console.log('boundary box query')
+
             } else if (currentTab === 'shp-query') {
                 var shpFile = $('#shp-file')[0].files;
                 fd.append('shp', shpFile[0]);
 
-                console.log('shpfile query', shpFile);
             } else if (currentTab === 'savedshp-query') {
                 var option = $('#saved-shp-option').val();
                 fd.append('shpId', option)
@@ -288,14 +298,20 @@
                 data: fd,
                 success: function (res) {
                     if (res.data) {
+                        // Reset message
                         $('.map-message').text("");
+                        $('.chart-message').text("");
+
+                        // SHow Bar Chart 
+                        $('#bar-plotly').html(res.data.barplotly)
+                        
                         // Leaflet Map
                         var markerOptions = {
                             radius: 5,
                             color: "#000",
                             weight: 1,
-                            opacity: 0.5,
-                            fillOpacity: 0.5,
+                            opacity: 0.7,
+                            fillOpacity: 0.7,
                         };
                         var feature = JSON.parse(res.data.points);
                         var poly = JSON.parse(res.data.polys);
@@ -306,11 +322,11 @@
                         pointLayer = L.geoJSON(feature, {
                             pointToLayer: function (feature, latlng) {
                                 if (feature.properties.type === 0) {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#ff7800"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#636EFA"})
                                 } else if (feature.properties.type === 1) {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#94fc03"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#EF553B"})
                                 } else {
-                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#7703fc"})
+                                    return L.circleMarker(latlng, {...markerOptions, fillColor: "#00CC96"})
                                 }
                             },
                             onEachFeature: function (feature, layer) { 
@@ -319,8 +335,20 @@
                             }
                         }).addTo(map);
 
+                        // Reset Button
+
+                        // Set Button to disabled
+                        submitBtn.text('Process');
+                        submitBtn.prop('disabled', false);
+
                     } else {
-                        $('.map-message').text('No result found!')
+                        $('#bar-plotly').html('');
+                        $('.chart-message').text('No result found!');
+                        $('.map-message').text('No result found!');
+
+                        // Set Button to disabled
+                        submitBtn.text('Process');
+                        submitBtn.prop('disabled', false);
                     }
                 },
                 error: function (err) {
