@@ -62,8 +62,8 @@
                                 <td><a href="/upload-lightning/{{ file.id }}">{{ file.filename }}</a></td>
                                 <td>{{ file.uploaded_at }}</td>
                                 <td>
-                                    <a href="{{ file.files.url }}" target="_blank"
-                                        class="btn btn-primary btn-sm">Download</a>
+                                    <a href="{{ file.files.url }}" target="_blank"  class="btn btn-primary btn-sm">Download</a>
+                                    <a href="{% url 'delete-lightning' id_files=file.id%}" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
                             {% endfor %}

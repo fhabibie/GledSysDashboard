@@ -40,3 +40,10 @@ def detail_lightning(request, id_files):
     }
 
     return render(request, 'detail_lightning.html', context)
+
+def delete_lighting_files(request, id_files):
+    file_obj = LightningFiles.objects.get(id = id_files)
+    print('delete files', id_files)
+    if (file_obj):
+        file_obj.delete()
+    return redirect('upload-lightning')
